@@ -34,3 +34,6 @@ npm run dev
 
 6. DELETE  /api/books/:id
   - deletes Book by id; returns 'ok' or 'Code 404'
+
+7. GET    /api/books/:id/download
+  - downloads file if it was in Book by id or returns '404 | Not Found'

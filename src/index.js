@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');
+const cors    = require('cors');
 
 const loggerMiddleware = require('./middlewares/logger');
 const errorMiddleware  = require('./middlewares/error');
@@ -12,6 +12,9 @@ const app = express();
 
 app.use(cors());
 app.use(loggerMiddleware);
+
+app.use('/public', express.static(__dirname + '/public'));
+
 app.use('/', indexRouter);
 app.use('/api/user', userRouter);
 app.use('/api/books', booksRouter);
