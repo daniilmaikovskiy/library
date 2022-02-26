@@ -11,7 +11,8 @@ npm run dev
   authors: "string",
   favorite: "string",
   fileCover: "string",
-  fileName: "string"
+  fileName: "string",
+  fileBook: "string",
 }
 
 ## API
@@ -22,17 +23,14 @@ npm run dev
 2. GET     /api/books/
   - returns Book[]
 
-3. GET     /api/books/
-  - returns Book[]
-
-4. GET     /api/books/:id
+3. GET     /api/books/:id
   - returns Book by id or 'Code 404'
 
-5. POST    /api/books/
+4. POST    /api/books/
   - creates new Book; returns Book[]; requires structure Book in body
 
-6. PUT     /api/books/:id
+5. PUT     /api/books/:id
   - updates Book by id; returns Book by id or 'Code 404'; requires structure Book in body
 
-7. DELETE  /api/books/:id
+6. DELETE  /api/books/:id
   - deletes Book by id; returns 'ok' or 'Code 404'

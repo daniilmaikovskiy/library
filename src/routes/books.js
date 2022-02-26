@@ -1,7 +1,7 @@
 const express = require('express');
-const cors = require('cors');
-const formData = require('express-form-data');
-const { Book } = require('./book');
+const { Book } = require('../models/book');
+
+const router = express.Router();
 
 const store = {
   books: [
@@ -18,24 +18,14 @@ const store = {
   ],
 };
 
-const app = express();
-
-app.use(formData.parse());
-app.use(cors());
-
-app.post('/api/user/login', (req, res) => {
-  res.status(201);
-  res.json({ id: 1, mail: "test@mail.ru" });
-});
-
-app.get('/api/books/', (req, res) => {
+router.get('/', (req, res) => {
   const { books } = store;
 
   res.status(200);
   res.json(books);
 });
 
-app.get('/api/books/:id', (req, res) => {
+router.get('/:id', (req, res) => {
   const { books } = store;
   const { id } = req.params;
 
@@ -50,7 +40,7 @@ app.get('/api/books/:id', (req, res) => {
   }
 });
 
-app.post('/api/books/', (req, res) => {
+router.post('/', (req, res) => {
   const { books } = store;
 
   const newBook = new Book(req.body);
@@ -61,7 +51,7 @@ app.post('/api/books/', (req, res) => {
   res.json(books);
 });
 
-app.put('/api/books/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { books } = store;
 
@@ -77,7 +67,7 @@ app.put('/api/books/:id', (req, res) => {
   }
 });
 
-app.delete('/api/books/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   const { id } = req.params;
   const { books } = store;
   
@@ -92,8 +82,4 @@ app.delete('/api/books/:id', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+module.exports = router;
