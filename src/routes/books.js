@@ -1,110 +1,101 @@
 const express = require('express');
-
-const fileMiddleware = require('../middlewares/file');
+const router = express.Router();
 
 const { Book } = require('../models/book');
 
-const router = express.Router();
+const { getStore, setStore, store } = require('../store');
 
-const store = {
-  books: [
-    new Book({ title: 'first', desc: 'desc' }),
-    new Book({ title: 'second', desc: 'desc' }),
-    new Book({
-      title:'my book',
-      desc: 'gg',
-      authors: 'I am',
-      favorite: 'for me',
-      fileCover: 'nice cover',
-      fileName: 'index.js',
-    }),
-  ],
-};
+router.get('/', async (req, res) => {
+  const books = store.books;
 
-router.get('/', (req, res) => {
-  const { books } = store;
-
-  res.status(200);
-  res.json(books);
+  res.render('books/index', { title: 'Книги', books });
 });
 
-router.get('/:id', (req, res) => {
-  const { books } = store;
+router.get('/view/:id', (req, res) => {
   const { id } = req.params;
 
-  const idx = books.findIndex((el) => el.id === id);
+  const books = store.books;
 
-  if (idx !== -1) {
-    res.status(200);
-    res.json(books[idx]);
+  const index = books.findIndex((item) => item.id === id);
+
+  if (index === -1) {
+    res.json('Not Found | 404');
   } else {
-    res.status(404);
-    res.json('Code: 404');
+    res.render('books/view', { title: 'Книги', book: books[index] });
   }
 });
 
-router.post('/', fileMiddleware.single('fileBook'), (req, res) => {
-  const { books } = store;
-  const { file, body } = req;
+router.get('/create', (req, res) => {
+  res.render('books/create', { title: 'Книги', book: new Book() });
+});
 
-  const newBook = new Book(body);
+router.get('/update/:id', (req, res) => {
+  const { id } = req.params;
 
-  newBook.fileBook = file?.path || '';
+  const books = getStore().books;
+
+  const index = books.findIndex((item) => item.id === id);
+
+  if (index === -1) {
+    res.json('Not Found | 404');
+  } else {
+    res.render('books/update', { title: 'Книги', book: books[index] });
+  }
+});
+
+// post
+
+router.post('/create', (req, res) => {
+  const books = store.books;
+
+  const { title, description } = req.body;
+
+  const newBook = new Book({ title, description });
 
   books.push(newBook);
 
-  res.status(201);
-  res.json(books);
+  setStore({ books });
+
+  res.redirect('/books');
 });
 
-router.put('/:id', fileMiddleware.single('fileBook'), (req, res) => {
-  const { file, body, params: { id } } = req;
-  const { books } = store;
+router.post('/update/:id', (req, res) => {
+  const books = store.books;
 
-  const idx = books.findIndex((el) => el.id === id);
+  const { id } = req.params;
+
+  const { title, description } = req.body;
+  const idx = books.findIndex(el => el.id === id);
 
   if (idx !== -1) {
-      books[idx] = { ...(new Book({ ...books[idx], ...body}, books[idx].id)) };
+      books[idx] = { ...books[idx], title, description };
 
-      books[idx].fileBook = file?.path || books[idx].fileBook;
+      setStore({ books });
 
-      res.json(books[idx]);
+      res.redirect(`/books/view/${id}`);
   } else {
       res.status(404);
-      res.json('Code: 404');
+      res.json('Not Found | 404')
   }
 });
 
-router.delete('/:id', (req, res) => {
+router.post('/delete/:id', (req, res) => {
+  const books = store.books;
+
   const { id } = req.params;
-  const { books } = store;
-  
-  const idx = books.findIndex((el) => el.id === id);
+
+  const idx = books.findIndex(el => el.id === id);
 
   if (idx !== -1) {
       books.splice(idx, 1);
-      res.json('ok');
+
+      setStore({ books });
+
+      res.redirect(`/books`);
   } else {
       res.status(404);
-      res.json('Code: 404');
+      res.json('Not Found | 404');
   }
-});
-
-router.get('/:id/download', (req, res) => {
-  const { id } = req.params;
-  const { books } = store;
-  
-  const idx = books.findIndex((el) => el.id === id);
-
-  const filePath = idx !== -1 ? books[idx].fileBook : '';
-  const fileName = idx !== -1 ? books[idx].title || id : '';
-
-  res.download(filePath, `${fileName}.txt`, (err) => {
-    if (err) {
-      res.status(404);
-      res.json('404 | Not Found');
-    }
-  });
 });
 
 module.exports = router;
